@@ -42,7 +42,7 @@ pip install -r requirements.txt
 
 Creá un archivo `.env` en la raíz con este contenido:
 
-```
+```env
 DATABASE_URL=sqlite:///./fintrack.db
 SECRET_KEY=mi_clave_secreta
 ```
