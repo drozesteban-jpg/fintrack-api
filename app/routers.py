@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.database import get_db
 from app import models, schemas
 
@@ -15,8 +15,19 @@ def crear_transaccion(transaccion: schemas.TransaccionCreate, db: Session = Depe
     return nueva
 
 @router.get("/transacciones", response_model=List[schemas.TransaccionResponse])
-def listar_transacciones(db: Session = Depends(get_db)):
-    return db.query(models.Transaccion).all()
+def listar_transacciones(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
+    tipo: Optional[models.TipoTransaccion] = Query(default=None),
+    categoria: Optional[str] = Query(default=None),
+    db: Session = Depends(get_db),
+):
+    q = db.query(models.Transaccion)
+    if tipo is not None:
+        q = q.filter(models.Transaccion.tipo == tipo)
+    if categoria is not None:
+        q = q.filter(models.Transaccion.categoria == categoria)
+    return q.offset(skip).limit(limit).all()
 
 @router.get("/transacciones/{id}", response_model=schemas.TransaccionResponse)
 def obtener_transaccion(id: int, db: Session = Depends(get_db)):
