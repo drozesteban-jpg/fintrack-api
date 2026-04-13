@@ -1,20 +1,14 @@
 from pydantic import BaseModel, field_validator, ConfigDict
 from datetime import datetime
+from app.models import TipoTransaccion
 
 class TransaccionBase(BaseModel):
     descripcion: str
     monto: float
-    tipo: str
+    tipo: TipoTransaccion
     categoria: str
 
 class TransaccionCreate(TransaccionBase):
-    @field_validator("tipo")
-    @classmethod
-    def validar_tipo(cls, v):
-        if v not in ["ingreso", "gasto"]:
-            raise ValueError("El tipo debe ser 'ingreso' o 'gasto'")
-        return v
-
     @field_validator("monto")
     @classmethod
     def validar_monto(cls, v):
