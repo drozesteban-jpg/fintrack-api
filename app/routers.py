@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional
 from app.database import get_db
 from app import models, schemas
@@ -47,12 +48,16 @@ def eliminar_transaccion(id: int, db: Session = Depends(get_db)):
 
 @router.get("/resumen")
 def resumen(db: Session = Depends(get_db)):
-    transacciones = db.query(models.Transaccion).all()
-    ingresos = sum(t.monto for t in transacciones if t.tipo == "ingreso")
-    gastos = sum(t.monto for t in transacciones if t.tipo == "gasto")
-    balance = ingresos - gastos
+    rows = (
+        db.query(models.Transaccion.tipo, func.sum(models.Transaccion.monto))
+        .group_by(models.Transaccion.tipo)
+        .all()
+    )
+    totales = {tipo: total for tipo, total in rows}
+    ingresos = totales.get(models.TipoTransaccion.ingreso, 0.0)
+    gastos = totales.get(models.TipoTransaccion.gasto, 0.0)
     return {
         "ingresos_totales": ingresos,
         "gastos_totales": gastos,
-        "balance": balance
+        "balance": ingresos - gastos,
     }
