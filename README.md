@@ -11,8 +11,9 @@ API REST para seguimiento de finanzas personales. Permite registrar ingresos y g
 
 ## Funcionalidades
 
+- Registro y login de usuarios con JWT
 - Registrar ingresos y gastos con categoría y descripción
-- Listar todas las transacciones
+- Listar todas las transacciones (con filtros y paginación)
 - Consultar una transacción por ID
 - Eliminar transacciones
 - Obtener resumen financiero con balance total
@@ -27,6 +28,8 @@ API REST para seguimiento de finanzas personales. Permite registrar ingresos y g
 - SQLite
 - Pydantic
 - Uvicorn
+- python-jose (JWT)
+- passlib (bcrypt)
 
 ---
 
@@ -65,29 +68,88 @@ http://127.0.0.1:8000/docs
 
 ---
 
+## Autenticación
+
+Todos los endpoints de transacciones requieren autenticación mediante JWT. El flujo es:
+
+1. Registrarse en `POST /auth/registro`
+2. Obtener un token en `POST /auth/login`
+3. Incluir el token en cada request como header: `Authorization: Bearer <token>`
+
+---
+
 ## Endpoints
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | /transacciones | Crear una transacción |
-| GET | /transacciones | Listar todas las transacciones |
-| GET | /transacciones/{id} | Obtener transacción por ID |
-| DELETE | /transacciones/{id} | Eliminar una transacción |
-| GET | /resumen | Ver balance total |
+### Autenticación
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| POST | /auth/registro | Registrar nuevo usuario | No |
+| POST | /auth/login | Obtener token JWT | No |
+
+### Transacciones
+
+Todos los endpoints de transacciones filtran automáticamente por el usuario autenticado.
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| POST | /transacciones | Crear una transacción | Si |
+| GET | /transacciones | Listar transacciones (con filtros) | Si |
+| GET | /transacciones/{id} | Obtener transacción por ID | Si |
+| DELETE | /transacciones/{id} | Eliminar una transacción | Si |
+| GET | /resumen | Ver balance total | Si |
+
+**Parámetros de filtro para `GET /transacciones`:**
+- `skip` — offset para paginación (default: 0)
+- `limit` — máximo de resultados (default: 20, máx: 100)
+- `tipo` — filtrar por `ingreso` o `gasto`
+- `categoria` — filtrar por categoría (texto exacto)
 
 ---
 
 ## Ejemplo de uso
 
-Crear un gasto:
+**1. Registrar usuario:**
+
+```bash
+curl -X POST http://127.0.0.1:8000/auth/registro \
+  -H "Content-Type: application/json" \
+  -d '{"email": "usuario@ejemplo.com", "password": "mi_clave"}'
+```
+
+Respuesta:
 
 ```json
 {
-  "descripcion": "Supermercado",
-  "monto": 5000,
-  "tipo": "gasto",
-  "categoria": "alimentacion"
+  "id": 1,
+  "email": "usuario@ejemplo.com"
 }
+```
+
+**2. Iniciar sesión:**
+
+```bash
+curl -X POST http://127.0.0.1:8000/auth/login \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=usuario@ejemplo.com&password=mi_clave"
+```
+
+Respuesta:
+
+```json
+{
+  "access_token": "eyJ...",
+  "token_type": "bearer"
+}
+```
+
+**3. Crear una transacción:**
+
+```bash
+curl -X POST http://127.0.0.1:8000/transacciones \
+  -H "Authorization: Bearer eyJ..." \
+  -H "Content-Type: application/json" \
+  -d '{"descripcion": "Supermercado", "monto": 5000, "tipo": "gasto", "categoria": "alimentacion"}'
 ```
 
 Respuesta:
