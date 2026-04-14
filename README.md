@@ -42,60 +42,60 @@ API REST para seguimiento de finanzas personales. Permite registrar ingresos y g
 
 ## Instalación local con Docker
 
-\`\`\`bash
+```bash
 git clone https://github.com/drozesteban-jpg/fintrack-api.git
 cd fintrack-api
-\`\`\`
+```
 
 Creá un archivo `.env` en la raíz con este contenido:
 
-\`\`\`env
+```env
 DATABASE_URL=postgresql://postgres:postgres@db:5432/fintrack
 SECRET_KEY=tu_clave_secreta
-\`\`\`
+```
 
 Levantá los contenedores:
 
-\`\`\`bash
+```bash
 docker compose up --build
-\`\`\`
+```
 
 Accedé a la documentación interactiva en:
 
-\`\`\`
+```
 http://localhost:8000/docs
-\`\`\`
+```
 
 ---
 
 ## Instalación local sin Docker
 
-\`\`\`bash
+```bash
 git clone https://github.com/drozesteban-jpg/fintrack-api.git
 cd fintrack-api
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-\`\`\`
+```
 
 Creá un archivo `.env` en la raíz con este contenido:
 
-\`\`\`env
+```env
 DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/fintrack
 SECRET_KEY=tu_clave_secreta
-\`\`\`
+```
 
 Ejecutá las migraciones:
 
-\`\`\`bash
+```bash
 alembic upgrade head
-\`\`\`
+```
 
 Iniciá el servidor:
 
-\`\`\`bash
+```bash
 uvicorn main:app --reload
-\`\`\`
+```
 
 ---
 
@@ -134,42 +134,42 @@ Todos los endpoints de transacciones requieren autenticación mediante JWT. El f
 
 **1. Registrar usuario:**
 
-\`\`\`bash
+```bash
 curl -X POST https://fintrack-api-production-fae6.up.railway.app/auth/registro \
   -H "Content-Type: application/json" \
   -d '{"email": "usuario@ejemplo.com", "password": "mi_clave"}'
-\`\`\`
+```
 
 **2. Iniciar sesión:**
 
-\`\`\`bash
+```bash
 curl -X POST https://fintrack-api-production-fae6.up.railway.app/auth/login \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=usuario@ejemplo.com&password=mi_clave"
-\`\`\`
+```
 
 **3. Crear una transacción:**
 
-\`\`\`bash
+```bash
 curl -X POST https://fintrack-api-production-fae6.up.railway.app/transacciones \
   -H "Authorization: Bearer eyJ..." \
   -H "Content-Type: application/json" \
   -d '{"descripcion": "Supermercado", "monto": 5000, "tipo": "gasto", "categoria": "alimentacion"}'
-\`\`\`
+```
 
 ---
 
 ## Tests
 
-\`\`\`bash
+```bash
 pytest tests/
-\`\`\`
+```
 
 ---
 
 ## Estructura del proyecto
 
-\`\`\`
+```
 fintrack-api/
 ├── main.py
 ├── requirements.txt
@@ -191,7 +191,7 @@ fintrack-api/
     ├── __init__.py
     ├── conftest.py
     └── test_main.py
-\`\`\`
+```
 
 ---
 
