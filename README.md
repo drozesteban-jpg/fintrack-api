@@ -10,6 +10,8 @@
 
 API REST para seguimiento de finanzas personales. Permite registrar ingresos y gastos, consultarlos por categoría y obtener un resumen del balance.
 
+🚀 **Demo en producción:** [https://fintrack-api-production-fae6.up.railway.app/docs](https://fintrack-api-production-fae6.up.railway.app/docs)
+
 ---
 
 ## Funcionalidades
@@ -34,10 +36,36 @@ API REST para seguimiento de finanzas personales. Permite registrar ingresos y g
 - **python-jose** — generación y verificación de JWT
 - **passlib + bcrypt** — hash de contraseñas
 - **pytest + httpx** — tests unitarios
+- **Docker** — contenedores
 
 ---
 
-## Instalación
+## Instalación local con Docker
+
+```bash
+git clone https://github.com/drozesteban-jpg/fintrack-api.git
+cd fintrack-api
+```
+
+Creá un archivo `.env` en la raíz con este contenido:
+
+```env
+DATABASE_URL=postgresql://postgres:postgres@db:5432/fintrack
+SECRET_KEY=tu_clave_secreta
+```
+
+Levantá los contenedores:
+
+```bash
+docker compose up --build
+```
+
+Accedé a la documentación interactiva en:
+http://localhost:8000/docs
+
+---
+
+## Instalación local sin Docker
 
 ```bash
 git clone https://github.com/drozesteban-jpg/fintrack-api.git
@@ -60,20 +88,10 @@ Ejecutá las migraciones:
 alembic upgrade head
 ```
 
----
-
-## Uso
-
 Iniciá el servidor:
 
 ```bash
 uvicorn main:app --reload
-```
-
-Accedé a la documentación interactiva en:
-
-```
-http://127.0.0.1:8000/docs
 ```
 
 ---
@@ -125,64 +143,31 @@ Todos los endpoints filtran automáticamente por el usuario autenticado.
 **1. Registrar usuario:**
 
 ```bash
-curl -X POST http://127.0.0.1:8000/auth/registro \
+curl -X POST https://fintrack-api-production-fae6.up.railway.app/auth/registro \
   -H "Content-Type: application/json" \
   -d '{"email": "usuario@ejemplo.com", "password": "mi_clave"}'
-```
-
-Respuesta:
-
-```json
-{
-  "id": 1,
-  "email": "usuario@ejemplo.com"
-}
 ```
 
 **2. Iniciar sesión:**
 
 ```bash
-curl -X POST http://127.0.0.1:8000/auth/login \
+curl -X POST https://fintrack-api-production-fae6.up.railway.app/auth/login \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=usuario@ejemplo.com&password=mi_clave"
-```
-
-Respuesta:
-
-```json
-{
-  "access_token": "eyJ...",
-  "token_type": "bearer"
-}
 ```
 
 **3. Crear una transacción:**
 
 ```bash
-curl -X POST http://127.0.0.1:8000/transacciones \
+curl -X POST https://fintrack-api-production-fae6.up.railway.app/transacciones \
   -H "Authorization: Bearer eyJ..." \
   -H "Content-Type: application/json" \
   -d '{"descripcion": "Supermercado", "monto": 5000, "tipo": "gasto", "categoria": "alimentacion"}'
 ```
 
-Respuesta:
-
-```json
-{
-  "id": 1,
-  "descripcion": "Supermercado",
-  "monto": 5000,
-  "tipo": "gasto",
-  "categoria": "alimentacion",
-  "fecha": "2026-04-12T20:33:19"
-}
-```
-
 ---
 
 ## Tests
-
-El proyecto incluye tests unitarios completos con pytest. Cubren autenticación, CRUD de transacciones, filtros, paginación, resumen y aislamiento entre usuarios.
 
 ```bash
 pytest tests/
@@ -191,11 +176,11 @@ pytest tests/
 ---
 
 ## Estructura del proyecto
-
-```
 fintrack-api/
 ├── main.py
 ├── requirements.txt
+├── Dockerfile
+├── docker-compose.yml
 ├── .env
 ├── .gitignore
 ├── README.md
@@ -203,16 +188,15 @@ fintrack-api/
 ├── alembic/
 │   └── versions/
 ├── app/
-│   ├── __init__.py
+│   ├── init.py
 │   ├── database.py
 │   ├── models.py
 │   ├── schemas.py
 │   └── routers.py
 └── tests/
-    ├── __init__.py
-    ├── conftest.py
-    └── test_main.py
-```
+├── init.py
+├── conftest.py
+└── test_main.py
 
 ---
 
